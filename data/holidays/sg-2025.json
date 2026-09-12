@@ -1,0 +1,20 @@
+{
+  "jurisdiction": "SG",
+  "year": 2025,
+  "source": "Ministry of Manpower gazetted public holidays 2025 (via data.gov.sg)",
+  "retrieved": "2026-09-12",
+  "verified": false,
+  "holidays": [
+    { "date": "2025-01-01", "name": "New Year's Day" },
+    { "date": "2025-01-29", "name": "Chinese New Year" },
+    { "date": "2025-01-30", "name": "Chinese New Year" },
+    { "date": "2025-03-31", "name": "Hari Raya Puasa" },
+    { "date": "2025-04-18", "name": "Good Friday" },
+    { "date": "2025-05-01", "name": "Labour Day" },
+    { "date": "2025-05-12", "name": "Vesak Day" },
+    { "date": "2025-06-07", "name": "Hari Raya Haji" },
+    { "date": "2025-08-09", "name": "National Day" },
+    { "date": "2025-10-20", "name": "Deepavali" },
+    { "date": "2025-12-25", "name": "Christmas Day" }
+  ]
+}

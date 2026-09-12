@@ -1,0 +1,61 @@
+# Limitation Act 1959 (Singapore).
+#
+# Limitation rules use the `limitation:` key (not `rules:`) because their semantics differ:
+# they run in years from accrual or knowledge, are not subject to O 3 r 2, and are not
+# rolled to the next working day.
+
+jurisdiction: SG
+instrument: Limitation Act 1959
+
+limitation:
+  - id: sg.limitation.contract
+    source: "Limitation Act 1959, s 6(1)(a)"
+    description: "Action founded on a contract (simple contract)"
+    years: 6
+    runs_from: accrual
+    verified: false
+    notes:
+      - "Accrual is the date of breach, not the date of loss."
+
+  - id: sg.limitation.tort
+    source: "Limitation Act 1959, s 6(1)(a)"
+    description: "Action founded on tort (other than personal injury / latent damage)"
+    years: 6
+    runs_from: accrual
+    verified: false
+    notes:
+      - "Accrual is when damage is suffered, for torts actionable only on damage."
+
+  - id: sg.limitation.personal-injury
+    source: "Limitation Act 1959, s 24A(2)"
+    description: "Personal injury: 3 years from accrual or from date of knowledge, whichever later"
+    years: 3
+    runs_from: knowledge
+    verified: false
+    notes:
+      - "Run this rule twice (accrual date, knowledge date) and take the LATER result."
+      - "Court may extend under s 24A(2)(b) / s 24B; this engine does not model extensions."
+
+  - id: sg.limitation.latent-damage-knowledge
+    source: "Limitation Act 1959, s 24A(3)(b) with s 24B longstop"
+    description: "Latent damage (non-PI): 3 years from date of knowledge, 15-year longstop from breach/act"
+    years: 3
+    runs_from: knowledge
+    longstop_years: 15
+    verified: false
+    notes:
+      - "Pass longstop_start = date of the act/omission; the engine applies the earlier of the two."
+
+  - id: sg.limitation.judgment
+    source: "Limitation Act 1959, s 6(3)"
+    description: "Action upon a judgment"
+    years: 12
+    runs_from: judgment
+    verified: false
+
+  - id: sg.limitation.land-recovery
+    source: "Limitation Act 1959, s 9(1)"
+    description: "Action to recover land"
+    years: 12
+    runs_from: accrual
+    verified: false

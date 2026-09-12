@@ -1,0 +1,116 @@
+# Rules of Court 2021 (Singapore) -- procedural time limits.
+#
+# CONVENTIONS
+#   id:        sg.<instrument>.<short-name>         (stable; never renumber)
+#   source:    exact provision, as cited in practice
+#   verified:  true ONLY after a human has checked period + provision against the current
+#              text on Singapore Statutes Online and recorded the check date in `notes`.
+#   Computation-of-time semantics (O 3 r 2) are implemented in the engine and apply to
+#   every rule unless overridden per-rule.
+#
+# Contributors: add rules here, never in Python. One PR per instrument where possible.
+
+jurisdiction: SG
+instrument: Rules of Court 2021
+
+rules:
+  # -- Originating process -----------------------------------------------------------
+
+  - id: sg.roc2021.originating-claim-validity
+    source: "Rules of Court 2021, O 6 r 3"
+    description: "Originating claim valid for service (from date of issue)"
+    period: { months: 3 }
+    direction: after
+    verified: false
+    tags: [service, originating-process]
+    notes:
+      - "Confirm period and whether an extension was granted; extensions alter the trigger."
+
+  - id: sg.roc2021.notice-intention-contest
+    source: "Rules of Court 2021, O 6 r 5"
+    description: "Defendant to file notice of intention to contest or not contest (served in Singapore)"
+    period: { days: 14 }
+    direction: after
+    verified: false
+    tags: [defence, pleadings]
+    notes:
+      - "Trigger is the date of service of the originating claim."
+      - "A longer period applies where served out of Singapore; use the -oos rule."
+
+  - id: sg.roc2021.notice-intention-contest-oos
+    source: "Rules of Court 2021, O 6 r 5"
+    description: "Notice of intention to contest or not contest (served out of Singapore)"
+    period: { days: 21 }
+    direction: after
+    verified: false
+    tags: [defence, pleadings, out-of-jurisdiction]
+
+  - id: sg.roc2021.defence
+    source: "Rules of Court 2021, O 6 r 7"
+    description: "Defence to be filed and served (statement of claim served in Singapore)"
+    period: { days: 21 }
+    direction: after
+    verified: false
+    tags: [defence, pleadings]
+    notes:
+      - "Trigger is the date of service of the statement of claim."
+
+  - id: sg.roc2021.defence-oos
+    source: "Rules of Court 2021, O 6 r 7"
+    description: "Defence to be filed and served (statement of claim served out of Singapore)"
+    period: { weeks: 5 }
+    direction: after
+    verified: false
+    tags: [defence, pleadings, out-of-jurisdiction]
+
+  - id: sg.roc2021.reply
+    source: "Rules of Court 2021, O 6 r 8"
+    description: "Reply (and defence to counterclaim) to be filed and served"
+    period: { days: 14 }
+    direction: after
+    verified: false
+    tags: [pleadings]
+    notes:
+      - "Trigger is the date of service of the defence."
+
+  # -- Interlocutory ---------------------------------------------------------------
+
+  - id: sg.roc2021.affidavit-reply-generic
+    source: "Rules of Court 2021, O 15 r 4 (court-directed; default shown)"
+    description: "Reply affidavit for an application (default direction; court may vary)"
+    period: { days: 14 }
+    direction: after
+    verified: false
+    tags: [interlocutory, affidavit]
+    notes:
+      - "Court directions override this. Always check the case conference order."
+
+  - id: sg.roc2021.clear-days-before-hearing-example
+    source: "Illustrative: 'not less than 2 clear days before the hearing'"
+    description: "Generic 'n clear days before' pattern (illustrates O 3 r 2(4)+(5))"
+    period: { days: 2 }
+    direction: before
+    clear_days: true
+    verified: false
+    tags: [illustrative, before]
+
+  # -- Appeals -----------------------------------------------------------------------
+
+  - id: sg.roc2021.appeal-notice
+    source: "Rules of Court 2021, O 19 r 25 / O 18 r 4 (as applicable)"
+    description: "Notice of appeal to the Appellate Division / Court of Appeal (from judgment)"
+    period: { days: 28 }
+    direction: after
+    verified: false
+    tags: [appeal]
+    notes:
+      - "Trigger is the date of the judgment or order; where leave was required, the trigger may differ."
+      - "Appeals against interlocutory decisions may carry a 14-day period; check the applicable Order."
+
+  - id: sg.roc2021.appeal-notice-interlocutory
+    source: "Rules of Court 2021, O 18 r 4"
+    description: "Notice of appeal against an interlocutory order (Registrar/Judge)"
+    period: { days: 14 }
+    direction: after
+    verified: false
+    tags: [appeal, interlocutory]
