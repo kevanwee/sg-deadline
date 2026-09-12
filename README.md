@@ -154,10 +154,10 @@ at compute time, never delete a trace line.
 
 ## Related projects
 
-This engine is consumed by [oblig-register](../oblig-register) (contract obligations to
-calendar) and is designed to sit alongside [citecheck](../citecheck),
-[bundlebuild](../bundlebuild), [chronology](../chronology) and
-[playbook-as-code](../playbook-as-code).
+This engine is consumed by [oblig-register](https://github.com/kevanwee/oblig-register) (contract obligations to
+calendar) and is designed to sit alongside [citecheck](https://github.com/kevanwee/citecheck),
+[bundlebuild](https://github.com/kevanwee/bundlebuild), [chronology](https://github.com/kevanwee/chronology) and
+[playbook-as-code](https://github.com/kevanwee/playbook-as-code).
 
 ## License
 
