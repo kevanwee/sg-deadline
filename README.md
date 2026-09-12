@@ -112,6 +112,11 @@ recorded the check in `notes`. Unverified rules still compute, but emit a warnin
 returned to the caller and printed to stderr. **Do not flip `verified` to `true` in a PR
 without citing what you checked and when.**
 
+> **Everything bundled in v0.1.0 is currently unverified.** Progress is tracked in
+> [#1](https://github.com/kevanwee/sg-deadline/issues/1), which lists every rule, the
+> provision to check it against, and the two conventions (backward roll for `before`
+> periods, the limitation anniversary rule) that need a decision rather than a lookup.
+
 ### Computation-of-time semantics (O 3 r 2)
 
 | Sub-rule | Behaviour | Engine flag |
