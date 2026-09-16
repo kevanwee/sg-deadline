@@ -1,0 +1,2 @@
+recursive-include rules *.yaml
+recursive-include data/holidays *.json

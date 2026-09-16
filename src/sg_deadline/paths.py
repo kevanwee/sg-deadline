@@ -11,5 +11,6 @@ _PKG = Path(__file__).resolve().parent
 # Repo layout: src/sg_deadline/paths.py -> repo root is three levels up.
 _ROOT = _PKG.parent.parent
 
-RULES_DIR = _ROOT / "rules"
-HOLIDAYS_DIR = _ROOT / "data" / "holidays"
+RULES_DIR = _ROOT / "rules" if (_ROOT / "rules").is_dir() else _PKG / "_data" / "rules"
+HOLIDAYS_DIR = (_ROOT / "data" / "holidays" if (_ROOT / "data" / "holidays").is_dir()
+                else _PKG / "_data" / "holidays")

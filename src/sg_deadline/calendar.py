@@ -101,6 +101,7 @@ class Calendar:
 
     def add_working_days(self, d: date, n: int) -> date:
         """Move n working days from d (d itself not counted). Negative n moves backwards."""
+        self.ensure_year(d.year)
         step = 1 if n >= 0 else -1
         remaining = abs(n)
         cur = d
@@ -112,6 +113,8 @@ class Calendar:
 
     def working_days_between(self, start: date, end: date) -> int:
         """Count working days strictly after `start` up to and including `end`."""
+        self.ensure_year(start.year)
+        self.ensure_year(end.year)
         if end < start:
             return -self.working_days_between(end, start)
         count = 0
