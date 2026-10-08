@@ -38,6 +38,19 @@ tool, and make the tool show its working.
 | `deemed_receipt_date` | Contractual notice clauses | Cutoff times, business-day offsets, deferral on non-working days |
 | `working_days_between`, `add_working_days`, `is_working_day` | Calendar utilities | Backed by vendored MOM public-holiday data |
 
+## Distribution reliability
+
+`python -m pip install .` installs the CLI with its bundled data, without requiring
+an editable checkout. Run it from any directory. Source contributors continue to
+edit the canonical root data directories; the build copies those files into the
+wheel. No legal facts or verification flags are changed by packaging.
+
+After installing `.[dev]`, run `python scripts/check_install.py`. It builds a source
+distribution, builds a wheel from that archive, installs it in a temporary environment
+outside the checkout, and checks the public commands against the bundled resources.
+CI runs this check on Linux and Windows. The check installs build tools, but the
+calculation commands themselves make no network requests.
+
 ## Install
 
 ```bash
