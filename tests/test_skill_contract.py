@@ -1,4 +1,5 @@
 """The skill adapter must report the engine's result and its limits, never a guessed date."""
+
 import json
 import subprocess
 import sys
@@ -17,10 +18,16 @@ def test_compute_matches_engine_and_flags_unverified_inputs():
     code, out = run("compute", "sg.roc2021.defence", "2026-03-13")
     assert code == 0 and set(out) == KEYS
     assert out["result_date"] == "2026-04-06"
-    assert out["rule"] == {"id": "sg.roc2021.defence", "source": "Rules of Court 2021, O 6 r 7", "verified": False}
-    assert out["trace"][-2].startswith("holiday data SG 2026") or any("DEADLINE: 2026-04-06" in line for line in out["trace"])
+    assert out["rule"] == {
+        "id": "sg.roc2021.defence",
+        "source": "Rules of Court 2021, O 6 r 7",
+        "verified": False,
+    }
+    assert any("DEADLINE: 2026-04-06" in line for line in out["trace"])
     assert {"year": 2026, "verified": False} in out["calendar"]["years"]
-    assert any("UNVERIFIED" in item for item in out["limitations"])  # unverified rule must be disclosed
+    assert any(
+        "UNVERIFIED" in item for item in out["limitations"]
+    )  # unverified rule must be disclosed
 
 
 def test_limitation_is_not_rolled_and_says_so():

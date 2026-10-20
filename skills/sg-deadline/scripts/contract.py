@@ -6,6 +6,8 @@ Usage:
 
 Exit codes: 0 computed, 2 unknown rule or bad input, 3 holiday data missing, 4 engine not installed.
 """
+
+import contextlib
 import json
 import sys
 from datetime import date
@@ -18,6 +20,7 @@ def engine_revision():
         return json.loads(source.read_text(encoding="utf-8"))["revision"]
     try:
         from importlib.metadata import version
+
         return "sg-deadline " + version("sg-deadline")
     except Exception:
         return "unknown"
@@ -38,40 +41,78 @@ def main(argv):
         from sg_deadline.limitation import limitation_period, load_limitation_rules
         from sg_deadline.rules import load_rules
     except ImportError:
-        emit({"status": "error", "error": "sg-deadline is not installed; see SKILL.md. Do not compute the date by hand."}, 4)
+        emit(
+            {
+                "status": "error",
+                "error": "sg-deadline is not installed; see SKILL.md. "
+                "Do not compute the date by hand.",
+            },
+            4,
+        )
     try:
         trigger = date.fromisoformat(trigger_text)
     except ValueError:
         emit({"status": "error", "error": f"Trigger must be YYYY-MM-DD, got {trigger_text!r}"}, 2)
     rules = load_rules() if kind == "compute" else load_limitation_rules()
     if rule_id not in rules:
-        emit({"status": "error", "error": f"Unknown rule {rule_id!r}; list rules with python -m sg_deadline.cli rules"}, 2)
+        emit(
+            {
+                "status": "error",
+                "error": f"Unknown rule {rule_id!r}; "
+                "list rules with python -m sg_deadline.cli rules",
+            },
+            2,
+        )
     rule, cal = rules[rule_id], load_calendar("SG")
     try:
-        result = compute(rule, trigger, cal) if kind == "compute" else limitation_period(rule, trigger, cal)
+        result = (
+            compute(rule, trigger, cal)
+            if kind == "compute"
+            else limitation_period(rule, trigger, cal)
+        )
     except HolidayDataMissingError as exc:
-        emit({"result_date": None, "rule": {"id": rule.id, "source": rule.source, "verified": rule.verified},
-              "trace": [f"No computation: {exc}"], "calendar": {"jurisdiction": "SG", "years": []},
-              "engine": {"name": "sg-deadline", "revision": engine_revision()},
-              "limitations": [f"Holiday data missing: {str(exc).rstrip('.')}. The date cannot be computed until the gazetted holidays are added."]}, 3)
+        emit(
+            {
+                "result_date": None,
+                "rule": {"id": rule.id, "source": rule.source, "verified": rule.verified},
+                "trace": [f"No computation: {exc}"],
+                "calendar": {"jurisdiction": "SG", "years": []},
+                "engine": {"name": "sg-deadline", "revision": engine_revision()},
+                "limitations": [
+                    f"Holiday data missing: {str(exc).rstrip('.')}. "
+                    "The date cannot be computed until the gazetted holidays are added."
+                ],
+            },
+            3,
+        )
     years = []
-    for year in range(min(trigger.year, result.deadline.year), max(trigger.year, result.deadline.year) + 1):
-        try:
+    for year in range(
+        min(trigger.year, result.deadline.year), max(trigger.year, result.deadline.year) + 1
+    ):
+        with contextlib.suppress(HolidayDataMissingError):
             years.append({"year": year, "verified": cal.ensure_year(year).verified})
-        except HolidayDataMissingError:
-            pass
     limitations = list(result.warnings)
     for entry in years:
         if not entry["verified"]:
-            limitations.append(f"Holiday data for SG {entry['year']} is unverified; check it against the gazetted public holidays.")
+            limitations.append(
+                f"Holiday data for SG {entry['year']} is unverified; "
+                "check it against the gazetted public holidays."
+            )
     if kind == "limitation":
-        limitations.append("Limitation date: the last day to commence proceedings; it is not rolled forward to a working day.")
-    emit({"result_date": result.deadline.isoformat(),
-          "rule": {"id": rule.id, "source": rule.source, "verified": bool(rule.verified)},
-          "trace": list(result.trace),
-          "calendar": {"jurisdiction": "SG", "years": years},
-          "engine": {"name": "sg-deadline", "revision": engine_revision()},
-          "limitations": limitations})
+        limitations.append(
+            "Limitation date: the last day to commence proceedings; "
+            "it is not rolled forward to a working day."
+        )
+    emit(
+        {
+            "result_date": result.deadline.isoformat(),
+            "rule": {"id": rule.id, "source": rule.source, "verified": bool(rule.verified)},
+            "trace": list(result.trace),
+            "calendar": {"jurisdiction": "SG", "years": years},
+            "engine": {"name": "sg-deadline", "revision": engine_revision()},
+            "limitations": limitations,
+        }
+    )
 
 
 if __name__ == "__main__":
