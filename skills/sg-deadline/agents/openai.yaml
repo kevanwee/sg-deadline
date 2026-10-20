@@ -1,0 +1,3 @@
+interface:
+  display_name: "Singapore deadlines"
+  short_description: "Deterministic Singapore legal deadlines with a derivation trace"
