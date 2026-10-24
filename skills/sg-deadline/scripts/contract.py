@@ -86,9 +86,10 @@ def main(argv):
             3,
         )
     years = []
-    for year in range(
+    touched_years = ({result.deadline.year} if kind == "limitation" else range(
         min(trigger.year, result.deadline.year), max(trigger.year, result.deadline.year) + 1
-    ):
+    ))
+    for year in sorted(touched_years):
         with contextlib.suppress(HolidayDataMissingError):
             years.append({"year": year, "verified": cal.ensure_year(year).verified})
     limitations = list(result.warnings)

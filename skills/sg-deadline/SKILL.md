@@ -62,3 +62,5 @@ This skill computes dates. It does not decide which proceedings to bring, whethe
 been extended by agreement or order, or whether a limitation defence applies. Court orders and
 extensions change the trigger or the period; the person responsible must supply them. Never
 file, serve or send anything.
+
+Limitation anniversaries can fall outside bundled holiday coverage because they are not rolled. Retain the warning that holiday/working-day status was not checked. Do not describe missing future calendar data as verified; working-day calculations still refuse uncovered years.

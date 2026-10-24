@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sg-deadline"
-version = "0.1.0"
+version = "0.1.1"
 description = "Deterministic legal deadline engine for Singapore. Rules as data, every answer with a derivation trace. Library, CLI and MCP server."
 readme = "README.md"
 license = { text = "MIT" }
