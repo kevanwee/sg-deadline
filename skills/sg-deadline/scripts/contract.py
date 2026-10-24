@@ -7,8 +7,9 @@ Usage:
 Exit codes: 0 computed, 2 unknown rule or bad input, 3 holiday data missing, 4 engine not installed.
 """
 
-import contextlib
+import argparse
 import json
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -38,13 +39,25 @@ def emit(payload, code=0):
 
 
 def main(argv):
-    if len(argv) != 3 or argv[0] not in ("compute", "limitation"):
-        emit({"status": "error", "error": __doc__.strip()}, 2)
-    kind, rule_id, trigger_text = argv
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("kind", choices=["compute", "limitation"])
+    parser.add_argument("rule_id")
+    parser.add_argument("trigger")
+    parser.add_argument(
+        "--offline", action="store_true", default=os.environ.get("SG_DEADLINE_OFFLINE") == "1"
+    )
+    parser.add_argument("--refresh", action="store_true")
+    parser.add_argument("--cache-dir", type=Path)
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--replay", type=Path)
+    args = parser.parse_args(argv)
+    kind, rule_id, trigger_text = args.kind, args.rule_id, args.trigger
     try:
-        from sg_deadline.calendar import HolidayDataMissingError, load_calendar
+        from sg_deadline.calendar import HolidayDataMissingError
+        from sg_deadline.calendar_store import CalendarSourceError, CalendarStore, canonical, digest
         from sg_deadline.engine import compute
         from sg_deadline.limitation import limitation_period, load_limitation_rules
+        from sg_deadline.preparation import prepare
         from sg_deadline.rules import load_rules
     except ImportError:
         emit(
@@ -69,14 +82,39 @@ def main(argv):
             },
             2,
         )
-    rule, cal = rules[rule_id], load_calendar("SG")
+    rule = rules[rule_id]
+    skill = Path(__file__).resolve().parent.parent
+    cache = args.cache_dir
+    if (
+        cache is None
+        and "SG_DEADLINE_CACHE" not in os.environ
+        and skill.parent.name == "skills"
+        and skill.parent.parent.name in {".agents", ".claude"}
+    ):
+        cache = skill.parents[2] / ".legal-eng/calendars"
+    identity = {
+        "engine": engine_revision(),
+        "kind": kind,
+        "rule_id": rule_id,
+        "trigger": trigger_text,
+        "rule_sha256": digest(canonical(rule.model_dump(mode="json"))),
+    }
     try:
-        result = (
-            compute(rule, trigger, cal)
-            if kind == "compute"
-            else limitation_period(rule, trigger, cal)
+        prepared = prepare(
+            lambda cal: (
+                compute(rule, trigger, cal)
+                if kind == "compute"
+                else limitation_period(rule, trigger, cal)
+            ),
+            store=CalendarStore(cache),
+            offline=args.offline,
+            refresh=args.refresh,
+            identity=identity,
+            receipt_path=args.receipt,
+            replay=args.replay,
         )
-    except HolidayDataMissingError as exc:
+        result, cal = prepared.value, prepared.calendar
+    except (HolidayDataMissingError, CalendarSourceError, OSError) as exc:
         emit(
             {
                 "result_date": None,
@@ -91,14 +129,10 @@ def main(argv):
             },
             3,
         )
-    years = []
-    touched_years = ({result.deadline.year} if kind == "limitation" else range(
-        min(trigger.year, result.deadline.year), max(trigger.year, result.deadline.year) + 1
-    ))
-    for year in sorted(touched_years):
-        with contextlib.suppress(HolidayDataMissingError):
-            years.append({"year": year, "verified": cal.ensure_year(year).verified})
-    limitations = list(result.warnings)
+    years = [
+        {"year": year, "verified": cal.ensure_year(year).verified} for year in sorted(cal.used)
+    ]
+    limitations = [*result.warnings, *prepared.warnings]
     for entry in years:
         if not entry["verified"]:
             limitations.append(
@@ -114,7 +148,7 @@ def main(argv):
         {
             "result_date": result.deadline.isoformat(),
             "rule": {"id": rule.id, "source": rule.source, "verified": bool(rule.verified)},
-            "trace": list(result.trace),
+            "trace": [*result.trace, *prepared.notes],
             "calendar": {"jurisdiction": "SG", "years": years},
             "engine": {"name": "sg-deadline", "revision": engine_revision()},
             "limitations": limitations,

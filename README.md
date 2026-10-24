@@ -186,3 +186,45 @@ calendar) and is designed to sit alongside [citecheck](https://github.com/kevanw
 ## License
 
 MIT.
+
+
+## Calendars that stay up to date
+
+There is no fixed end year in the engine. Application entry points prepare calendars
+from the official MOM collection on data.gov.sg, discover newly published years and
+cache source bytes plus immutable calendar snapshots. Arithmetic functions remain pure:
+callers that use `compute()` directly still supply a calendar explicitly.
+
+The CLI, MCP tools and skill adapter check missing calendars before calculation and
+refresh used snapshots when their seven-day check is due. They retain unverified-rule
+and calendar warnings. Network failure can use existing snapshots with a warning;
+uncovered or unpublished years cannot produce working-day results. This does not
+predict future holidays or establish that a legal rule is current.
+
+```sh
+sg-deadline calendars status
+sg-deadline calendars refresh
+sg-deadline --receipt matter-date.json --json compute sg.roc2021.defence 2027-01-16
+sg-deadline --replay matter-date.json --json compute sg.roc2021.defence 2027-01-16
+sg-deadline --offline --json compute sg.roc2021.defence 2027-01-16
+```
+
+Use `--calendar-cache PATH` or `SG_DEADLINE_CACHE` for the cache location. Installed
+skills use their workspace's `.legal-eng/calendars`; standalone tools default to the
+user cache. Every application calculation saves an immutable receipt with the exact
+rule/input identity, engine version and normalized calendars. Raw downloaded evidence
+is content-addressed in the cache. Copy an explicit receipt into the matter evidence
+for portable offline replay; keep the original engine installation too. Refresh does
+not rewrite receipts. A changed-year notice means outstanding dates need review.
+
+The official collection and dataset responses are checked for publisher, membership,
+complete record counts, duplicate dates and inconsistent weekdays. Structural validation
+and HTTPS provenance are separate from human legal verification. Automatic downloads
+never set `verified: true`. The source data is provided under the Singapore Open Data
+Licence; its source URLs and hashes are retained with each downloaded snapshot.
+
+The `Official calendar availability` GitHub workflow refreshes public calendars weekly
+and retains source snapshots as an artifact. Runtime refresh also works independently
+of CI. For an offline installation, schedule `sg-deadline calendars refresh` in its own
+environment when connectivity is available. A denied request, changed source format
+or unavailable publisher is surfaced explicitly and never treated as an empty calendar.

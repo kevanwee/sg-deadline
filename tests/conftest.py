@@ -16,3 +16,9 @@ def rules():
 @pytest.fixture(scope="session")
 def limitation_rules():
     return load_limitation_rules()
+
+
+@pytest.fixture(autouse=True)
+def isolated_calendar_environment(monkeypatch, tmp_path):
+    monkeypatch.setenv("SG_DEADLINE_OFFLINE", "1")
+    monkeypatch.setenv("SG_DEADLINE_CACHE", str(tmp_path / "calendar-cache"))

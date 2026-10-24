@@ -19,6 +19,10 @@ SATURDAY, SUNDAY = 5, 6
 class HolidayDataMissingError(LookupError):
     """Raised when a computation touches a year with no vendored holiday file."""
 
+    def __init__(self, message: str, *, year: int | None = None):
+        super().__init__(message)
+        self.year = year
+
 
 @dataclass(frozen=True)
 class HolidayYear:
@@ -46,7 +50,7 @@ class Calendar:
             raise HolidayDataMissingError(
                 f"No public-holiday data for {self.jurisdiction} {year}. "
                 f"Add data/holidays/{self.jurisdiction.lower()}-{year}.json "
-                "(see scripts/refresh_holidays.py)."
+                "(see scripts/refresh_holidays.py).", year=year,
             ) from None
 
     def holiday_name(self, d: date) -> str | None:
