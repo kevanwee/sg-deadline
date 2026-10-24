@@ -13,6 +13,12 @@ engine, and report its result and limits faithfully.
 
 ## Make the engine available
 
+When this skill includes `runtime/sg_deadline`, its contract adapter uses that
+bundled engine and calendar data ahead of any globally installed package. The
+workspace assembler supplies these files from the same pinned source archive.
+The adapter still needs the engine's declared Python dependencies. Use the
+adapter commands below for the bundled runtime; the global CLI may be a different version.
+
 The engine is a Python package. If `python -m sg_deadline.cli --help` fails, install the
 pinned revision recorded in this skill's `TOOLKIT-SOURCE.json`, or the revision the user names:
 
@@ -48,7 +54,7 @@ python <this skill>/scripts/contract.py limitation <rule-id> <YYYY-MM-DD>
 
 The output carries the date, the rule's source and verification status, the full trace, the
 holiday years touched with their verification status, the engine revision, and limitations.
-Exit code 3 means holiday data is missing for a year the computation touches: report that the
+Exit code 3 means holiday data needed for the computation is missing: report that the
 date cannot be computed, and do not assume there are no holidays.
 
 Report the date with its trace. Lead with any limitation: an unverified rule or holiday year
