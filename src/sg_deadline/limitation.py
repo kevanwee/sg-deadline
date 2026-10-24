@@ -86,7 +86,16 @@ def limitation_period(
             deadline = longstop
             trace.append("longstop is earlier and therefore controls")
 
-    if cal is not None:
+    if cal is not None and deadline.year not in cal.years:
+        # No working-day operation is performed for a limitation anniversary.
+        # Missing holiday data prevents only the optional classification, not
+        # the anniversary arithmetic; never classify an uncovered day as working.
+        note = (f"Holiday data for {cal.jurisdiction} {deadline.year} is unavailable; "
+                "holiday/working-day status was not checked. The limitation anniversary "
+                "is unchanged and is NOT rolled forward.")
+        trace.append(note)
+        warnings.append(note)
+    elif cal is not None:
         reason = cal.why_non_working(deadline)
         if reason:
             trace.append(f"{_fmt(deadline)} is a {reason}. Limitation is NOT extended; "

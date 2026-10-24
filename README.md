@@ -72,7 +72,13 @@ sg-deadline add-working-days 2026-12-24 3
 sg-deadline deemed email 2026-03-13T18:05 --offset 1 --business-days --cutoff 17:00
 ```
 
-Exit codes: `0` ok, `2` unknown rule, `3` holiday data missing for a year you touched.
+Exit codes: `0` ok, `2` unknown rule, `3` holiday data missing for a year needed by working-day arithmetic.
+
+Limitation anniversaries do not roll forward. They can therefore be computed beyond
+the bundled holiday years; the trace and warnings explicitly say when holiday/working-day
+status could not be checked. This does not verify accrual, the applicable limitation
+rule or legal exceptions, and it does not relax coverage requirements for procedural
+or contractual business-day calculations.
 
 ## MCP server
 

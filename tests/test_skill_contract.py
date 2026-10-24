@@ -45,3 +45,11 @@ def test_missing_holiday_year_returns_no_date():
 def test_unknown_rule_and_bad_date_are_errors():
     assert run("compute", "sg.no-such-rule", "2026-01-01")[0] == 2
     assert run("compute", "sg.roc2021.defence", "13/03/2026")[0] == 2
+
+
+def test_future_limitation_computes_without_claiming_calendar_coverage():
+    code, out = run("limitation", "sg.limitation.contract", "2026-10-24")
+    # Six anniversaries after 24 Oct 2026 is 24 Oct 2032; no business-day roll.
+    assert code == 0 and out["result_date"] == "2032-10-24"
+    assert out["calendar"]["years"] == []
+    assert any("was not checked" in note for note in out["limitations"])
