@@ -1,6 +1,8 @@
 """The skill adapter must report the engine's result and its limits, never a guessed date."""
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -53,3 +55,31 @@ def test_future_limitation_computes_without_claiming_calendar_coverage():
     assert code == 0 and out["result_date"] == "2032-10-24"
     assert out["calendar"]["years"] == []
     assert any("was not checked" in note for note in out["limitations"])
+
+
+def test_bundled_runtime_takes_precedence_over_an_unrelated_engine(tmp_path):
+    root = ADAPTER.parents[3]
+    skill = tmp_path / "skill"
+    scripts = skill / "scripts"
+    scripts.mkdir(parents=True)
+    shutil.copy2(ADAPTER, scripts / "contract.py")
+    package = skill / "runtime" / "sg_deadline"
+    shutil.copytree(
+        root / "src" / "sg_deadline", package, ignore=shutil.ignore_patterns("__pycache__")
+    )
+    for folder in ("rules", "data/holidays"):
+        shutil.copytree(root / folder, package / "_resources" / folder)
+    revision = "a" * 40
+    (skill / "TOOLKIT-SOURCE.json").write_text(json.dumps({"revision": revision}))
+    unrelated = tmp_path / "unrelated" / "sg_deadline"
+    unrelated.mkdir(parents=True)
+    (unrelated / "__init__.py").write_text("raise RuntimeError('unrelated global engine loaded')")
+    process = subprocess.run(
+        [sys.executable, str(scripts / "contract.py"), "limitation",
+         "sg.limitation.contract", "2026-10-24"],
+        capture_output=True, text=True, env={**os.environ, "PYTHONPATH": str(unrelated.parent)},
+    )
+    assert process.returncode == 0, process.stderr
+    out = json.loads(process.stdout)
+    assert out["result_date"] == "2032-10-24"
+    assert out["engine"]["revision"] == revision

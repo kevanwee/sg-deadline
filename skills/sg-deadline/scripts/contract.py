@@ -13,10 +13,16 @@ import sys
 from datetime import date
 from pathlib import Path
 
+# Workspace assemblies can supply the engine and resources from the same pinned
+# archive as this adapter. Prefer those bytes over a machine's installed package.
+RUNTIME = Path(__file__).resolve().parent.parent / "runtime"
+if (RUNTIME / "sg_deadline" / "__init__.py").is_file():
+    sys.path.insert(0, str(RUNTIME))
+
 
 def engine_revision():
     source = Path(__file__).resolve().parent.parent / "TOOLKIT-SOURCE.json"
-    if source.is_file():
+    if source.is_file() and (RUNTIME / "sg_deadline" / "__init__.py").is_file():
         return json.loads(source.read_text(encoding="utf-8"))["revision"]
     try:
         from importlib.metadata import version
