@@ -15,14 +15,17 @@ provable; treat it that way.
    explicit (a rule id). If you feel the urge to add a "smart" lookup, stop; that belongs in
    a skill or the MCP client, not here.
 2. **Never guess a holiday.** `Calendar` raises `HolidayDataMissingError` for uncovered years.
-   Do not add a fallback that assumes "no holidays". Do not catch the exception inside the
-   library.
+   Do not add a fallback that assumes "no holidays". Do not catch the exception inside arithmetic functions. The separately invoked
+   preparation layer may retrieve missing official calendars and retry the same pure operation.
 3. **Never delete a trace line to tidy output.** Add lines freely; remove none. If output is
    too long for a UI, that UI truncates; the engine does not.
 4. **Rules live in YAML, never in Python.** `rules.py` defines the schema; `rules/**/*.yaml`
    holds the content. A new rule is a YAML edit plus a golden test.
-5. **No network at compute time.** Holiday refresh is a script run by a human and committed
-   as a reviewable diff. The engine reads files only.
+5. **No network inside arithmetic.** The CLI, skill adapter and MCP prepare official calendars
+   before calculation, then call the pure engine with a frozen snapshot. The preparation
+   layer caches raw source evidence and versioned calendars; receipts preserve the rule,
+   inputs, engine and snapshots. Automated retrieval never sets `verified: true`.
+   Maintenance commands and the scheduled availability workflow can refresh published years.
 6. **`verified: true` requires evidence.** A PR that flips it must quote the provision
    checked and the date checked, in `notes`. Reviewers: reject otherwise.
 

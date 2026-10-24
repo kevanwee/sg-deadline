@@ -70,3 +70,39 @@ extensions change the trigger or the period; the person responsible must supply 
 file, serve or send anything.
 
 Limitation anniversaries can fall outside bundled holiday coverage because they are not rolled. Retain the warning that holiday/working-day status was not checked. Do not describe missing future calendar data as verified; working-day calculations still refuse uncovered years.
+
+
+## Calendar preparation and reproducibility
+
+The contract adapter now prepares missing or stale calendars automatically from the
+MOM collection on data.gov.sg, then runs the arithmetic with frozen local snapshots.
+It downloads only public calendar data; matter facts and rule selections are not sent.
+Downloaded calendars remain **unverified** until checked under your review procedure.
+A refresh checks all published years; no source change requires editing year IDs in code.
+
+Installed workspaces keep the cache and immutable calculation receipts below
+`.legal-eng/calendars`. Standalone use defaults to the user's cache; override it with
+`SG_DEADLINE_CACHE` or the adapter's `--cache-dir`. The seven-day check runs on use;
+`--refresh` forces a check. After a failed check, a short cooldown prevents repeated
+requests. Cached/bundled data remains usable with an explicit warning. If a required
+year is absent, the adapter returns no date rather than projecting holidays.
+
+```sh
+python <this skill>/scripts/calendars.py status
+python <this skill>/scripts/calendars.py refresh
+python <this skill>/scripts/contract.py compute <rule-id> <date> --receipt <new-receipt.json>
+python <this skill>/scripts/contract.py compute <rule-id> <date> --offline
+python <this skill>/scripts/contract.py compute <rule-id> <date> --replay <receipt.json>
+```
+
+Every successful adapter calculation writes a receipt and includes source snapshot IDs
+and its receipt hash in the trace without changing computation@1. Replay requires the
+same engine, selected rule and inputs, uses the receipt's calendars without network
+access, and rejects altered receipts. Preserve the receipt with the matter evidence.
+Receipt paths cannot be overwritten. Calendar updates apply to new calculations;
+review outstanding dates when the publisher amends an earlier year. Never change an
+old calculation merely because the current cache has newer data.
+
+`SG_DEADLINE_OFFLINE=1` disables automatic retrieval. An offline snapshot is reproducible,
+but its age must be considered before relying on a deadline. Legal-rule currentness is
+separate from calendar refresh and still requires responsible review.

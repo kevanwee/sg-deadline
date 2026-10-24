@@ -17,4 +17,5 @@ htmlcov/
 Thumbs.db
 # generated outputs
 out/
+.calendar-watch/
 *.bundle.pdf
